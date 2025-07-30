@@ -22,6 +22,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add health check endpoints
+@app.get("/")
+async def health_check():
+    return {"status": "healthy", "service": "secret-text-server"}
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 @server.list_tools()
 async def handle_list_tools() -> List[types.Tool]:
     """List available tools."""
