@@ -87,15 +87,18 @@ async def mcp_root(request: Request):
         body = await request.json()
         logger.info(f"MCP REQUEST: {json.dumps(body, indent=2)}")
         
-        response = await server.handle_request(body)
+        response = await server._handle_request(body)
         
         logger.info(f"MCP RESPONSE: {json.dumps(response, indent=2)}")
         return response
     except Exception as e:
         logger.error(f"MCP ERROR: {str(e)}", exc_info=True)
         error_response = {"jsonrpc": "2.0", "error": {"code": -32700, "message": str(e)}}
-        if "id" in body:
-            error_response["id"] = body["id"]
+        try:
+            if "id" in body:
+                error_response["id"] = body["id"]
+        except:
+            pass
         return error_response
 
 @app.post("/mcp")
@@ -105,15 +108,18 @@ async def mcp_endpoint(request: Request):
         body = await request.json()
         logger.info(f"MCP REQUEST (/mcp): {json.dumps(body, indent=2)}")
         
-        response = await server.handle_request(body)
+        response = await server._handle_request(body)
         
         logger.info(f"MCP RESPONSE (/mcp): {json.dumps(response, indent=2)}")
         return response
     except Exception as e:
         logger.error(f"MCP ERROR (/mcp): {str(e)}", exc_info=True)
         error_response = {"jsonrpc": "2.0", "error": {"code": -32700, "message": str(e)}}
-        if "id" in body:
-            error_response["id"] = body["id"]
+        try:
+            if "id" in body:
+                error_response["id"] = body["id"]
+        except:
+            pass
         return error_response
 
 # OAuth endpoints (return 404 as expected)
