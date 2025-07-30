@@ -106,24 +106,47 @@ async def handle_mcp_request(request_data: dict):
         }
     
     elif method == "tools/list":
-        tools = await handle_list_tools()
         return {
             "jsonrpc": "2.0",
             "id": request_id,
-            "result": {"tools": [tool.dict() for tool in tools]}
+            "result": {
+                "tools": [
+                    {
+                        "name": "get_secret_text",
+                        "description": "Returns a secret text",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {},
+                            "required": []
+                        }
+                    }
+                ]
+            }
         }
     
     elif method == "tools/call":
         params = request_data.get("params", {})
-        result = await handle_call_tool(
-            params.get("name"), 
-            params.get("arguments", {})
-        )
-        return {
-            "jsonrpc": "2.0",
-            "id": request_id,
-            "result": {"content": [content.dict() for content in result]}
-        }
+        tool_name = params.get("name")
+        
+        if tool_name == "get_secret_text":
+            return {
+                "jsonrpc": "2.0",
+                "id": request_id,
+                "result": {
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "Hello World! The secret text is: ANTHROPIC"
+                        }
+                    ]
+                }
+            }
+        else:
+            return {
+                "jsonrpc": "2.0",
+                "id": request_id,
+                "error": {"code": -32602, "message": f"Unknown tool: {tool_name}"}
+            }
     
     return {
         "jsonrpc": "2.0", 
