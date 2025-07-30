@@ -6,7 +6,6 @@ build-backend = "hatchling.build"
 name = "secret-word-mcp-server"
 version = "0.1.0"
 description = "A simple MCP server that returns a secret word via HTTP"
-readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
     "mcp>=0.1.0",
