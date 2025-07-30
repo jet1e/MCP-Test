@@ -46,7 +46,7 @@ async def handle_call_tool(
         return [
             types.TextContent(
                 type="text",
-                text="Hello World!"
+                text="Hello World! The secret text is: ANTHROPIC"
             )
         ]
     else:
@@ -71,7 +71,9 @@ async def mcp_root(request: Request):
     """Handle MCP requests at root"""
     try:
         body = await request.json()
-        return await handle_mcp_request(body)
+        # Use the actual MCP server to handle requests
+        response = await server.handle_request(body)
+        return response
     except Exception as e:
         return {"jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}}
 
@@ -80,79 +82,11 @@ async def mcp_endpoint(request: Request):
     """Handle MCP requests at /mcp"""
     try:
         body = await request.json()
-        return await handle_mcp_request(body)
+        # Use the actual MCP server to handle requests
+        response = await server.handle_request(body)
+        return response
     except Exception as e:
         return {"jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}}
-
-async def handle_mcp_request(request_data: dict):
-    """Handle MCP requests"""
-    method = request_data.get("method")
-    request_id = request_data.get("id")
-    
-    if method == "initialize":
-        return {
-            "jsonrpc": "2.0",
-            "id": request_id,
-            "result": {
-                "protocolVersion": "2024-11-05",
-                "capabilities": {
-                    "tools": {}
-                },
-                "serverInfo": {
-                    "name": "secret-text-server",
-                    "version": "1.0.0"
-                }
-            }
-        }
-    
-    elif method == "tools/list":
-        return {
-            "jsonrpc": "2.0",
-            "id": request_id,
-            "result": {
-                "tools": [
-                    {
-                        "name": "get_secret_text",
-                        "description": "Returns a secret text",
-                        "inputSchema": {
-                            "type": "object",
-                            "properties": {},
-                            "required": []
-                        }
-                    }
-                ]
-            }
-        }
-    
-    elif method == "tools/call":
-        params = request_data.get("params", {})
-        tool_name = params.get("name")
-        
-        if tool_name == "get_secret_text":
-            return {
-                "jsonrpc": "2.0",
-                "id": request_id,
-                "result": {
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "Hello World! The secret text is: ANTHROPIC"
-                        }
-                    ]
-                }
-            }
-        else:
-            return {
-                "jsonrpc": "2.0",
-                "id": request_id,
-                "error": {"code": -32602, "message": f"Unknown tool: {tool_name}"}
-            }
-    
-    return {
-        "jsonrpc": "2.0", 
-        "id": request_id,
-        "error": {"code": -32601, "message": f"Method not found: {method}"}
-    }
 
 # OAuth endpoints (return 404 as expected)
 @app.get("/.well-known/oauth-authorization-server")
